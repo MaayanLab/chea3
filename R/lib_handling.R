@@ -2,7 +2,7 @@ getLibNames = function(){
   return(names(libs))
 }
 
-getLib(name){
+getLib = function(name){
   return(libs[[name]])
 }
 
