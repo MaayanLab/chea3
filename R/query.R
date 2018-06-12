@@ -41,7 +41,7 @@ queryChea3 = function(
     df = df[order(df$FET.p.val),][1:n_results,]
     return(df)
   })
-  return(jsonlite::asJSON(results))
+  return(jsonlite::toJSON(results))
 }
 
 
