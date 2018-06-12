@@ -15,8 +15,9 @@
 #' results = queryChea3(set_name = "exp1_DEG",example_query)
 #'
 
-queryChea3 = function(set_name = "untitled",
+queryChea3 = function(
   geneset,
+  set_name = "untitled",
   n_results = 10,
   libnames = names(libs),
   integrate_libs = T,
