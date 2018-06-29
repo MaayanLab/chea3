@@ -19,7 +19,7 @@ queryChea3 = function(
   geneset,
   set_name = "untitled",
   n_results = 10,
-  libnames = names(libs),
+  libnames = names(chea3::libs),
   integrate_libs = T,
   method = c("FET"),
   background = NULL){
@@ -27,20 +27,45 @@ queryChea3 = function(
   query = list(geneset)
   names(query) = set_name
 
-
+  #check library names and ensure in-package availability
   if(!all(libnames %in% names(libs))){
     error(paste("The following libraries are unavailable:",
       paste(setdiff(libnames,names(libs)),collapse = " "),
       "These are the libraries available:",
       paste(names(libs),collapse = " ")))}
 
-  temp_libs = libs[libnames]
-  results = lapply(temp_libs,function(x){
+  my_libs = chea3::libs[libnames]
+
+  #list of results data frames
+
+  results = lapply(my_libs,function(x){
     df = genesetr::pairwiseSetOverlap(query, x,
       background = background, method = method)
-    df = df[order(df$FET.p.val),][1:n_results,]
+    df$rank = rank(df$FET.p.val,ties.method = "random")/nrow(df)
+    df$TF = unlist(sapply(strsplit(df$set2,"_"),"[",1))
+    df[,c("a","b","c","d")] = NULL
     return(df)
   })
+
+
+  if(integrate_libs){
+    df_results = plyr::ldply(results,function(sub){
+      return(sub)
+    })
+    int_results = plyr::ddply(df_results,plyr::.(TF),function(sub){
+      sub = sub[order(sub$rank),][1,]
+      return(sub)
+    })
+    int_results$rank = rank(int_results$rank,ties.method = "random")
+
+    results[["integrated"]] = int_results
+
+    results = lapply(results,function(sub){
+      sub$rank = rank(sub$rank,ties.method = "random")
+      return(sub[order(sub$rank),][1:n_results,])
+    })
+  }
+
   return(jsonlite::toJSON(results))
 }
 
