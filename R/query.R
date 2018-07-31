@@ -61,7 +61,7 @@ queryChea = function(
     int_results$prev_rank = int_results$rank
     int_results$rank = rank(int_results$rank,ties.method = "random")
 
-    results[["integrated"]] = int_results
+    results[["Integrated"]] = int_results
 
     results = lapply(results,function(sub){
       sub$rank = rank(sub$rank,ties.method = "random")
