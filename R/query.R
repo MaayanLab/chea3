@@ -97,11 +97,11 @@ queryChea = function(
 queryCheaWeb = function(
   geneset,
   set_name = "untitled",
-  n_results = 10,
+  n_results = "all",
   libnames = names(chea3::libs),
   integrate_libs = T,
   method = c("FET"),
-  background = NULL){
+  background = 30000){
 
   results = queryChea(geneset = geneset,
     set_name = set_name,
@@ -110,7 +110,14 @@ queryCheaWeb = function(
     integrate_libs = integrate_libs,
     method = method,
     background = background)
+  lib_descripts = chea3::getLibDescriptShort()
+  lib_descripts = lib_descripts[order(unlist(lib_descripts))]
+  lib_descripts = rlist::list.prepend(lib_descripts,Integrated = "integrated results from all resources")
 
+  results = results[match(names(lib_descripts),names(results))]
+  idx = match(names(results),names(lib_descripts))
+  names(results) = paste(names(results), ": ",
+    unlist(lib_descripts[idx]),sep = "")
   return(jsonlite::toJSON(results))
 }
 
