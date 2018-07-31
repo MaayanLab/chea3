@@ -118,6 +118,8 @@ queryCheaWeb = function(
   idx = match(names(results),names(lib_descripts))
   names(results) = paste(names(results), ": ",
     unlist(lib_descripts[idx]),sep = "")
+  #url encode the names
+  names(results) = gsub(" ","%20",names(results))
   return(jsonlite::toJSON(results))
 }
 
