@@ -50,27 +50,7 @@ queryChea = function(
   })
 
 
-  if(integrate_libs){
-    df_results = plyr::ldply(results,function(sub){
-      return(sub)
-    })
-    int_results = plyr::ddply(df_results,plyr::.(TF),function(sub){
-      sub = sub[order(sub$rank),][1,]
-      return(sub)
-    })
-    int_results$prev_rank = int_results$rank
-    int_results$rank = rank(int_results$rank,ties.method = "random")
-
-    results[["Integrated"]] = int_results
-
-    results = lapply(results,function(sub){
-      sub$rank = rank(sub$rank,ties.method = "random")
-      if(n_results == "all"){
-        return(sub[order(sub$rank),])
-      }
-      return(sub[order(sub$rank),][1:n_results,])
-    })
-  }
+  if(integrate_libs) results = genesetr::integrateResultsDF(results)
 
   return(results)
 }
@@ -122,3 +102,27 @@ queryCheaWeb = function(
   return(jsonlite::toJSON(results))
 }
 
+integrateResultsDF = function(results){
+  if(!sum(sapply(list,is.data.frame))>1) error("Must have >1 results dataframe in order to integrate results.")
+
+  df_results = plyr::ldply(results,function(sub){
+    return(sub)
+  })
+  int_results = plyr::ddply(df_results,plyr::.(TF),function(sub){
+    sub = sub[order(sub$rank),][1,]
+    return(sub)
+  })
+  int_results$prev_rank = int_results$rank
+  int_results$rank = rank(int_results$rank,ties.method = "random")
+
+  results[["Integrated"]] = int_results
+
+  results = lapply(results,function(sub){
+    sub$rank = rank(sub$rank,ties.method = "random")
+    if(n_results == "all"){
+      return(sub[order(sub$rank),])
+    }
+    return(sub[order(sub$rank),][1:n_results,])
+  })
+  return(results)
+} #end function integrateResultsDF()

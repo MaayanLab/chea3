@@ -1,5 +1,12 @@
 benchmarkCDF = function(predict_lib, valid_lib, shuffled_ctl = T,
-  background = NULL, method = "FET"){
+  background = NULL, method = "FET", integrate = F){
+  #check whether valid_lib is nested list
+  if(any(sapply(valid_lib, is.list))) error("May only use one validation library.")
+  #check whether predict_lib is nested list
+  if(any(sapply(predict_lib, is.list))) error("May use one prediction library.
+    For multiple prediction libraries use chea3::multibenchmarkCDF()")
+
+
   results = genesetr::pairwiseSetOverlap(lib1 = predict_lib, lib2 = valid_lib,
     background = background, method = method)
   #shuffle the validation library
@@ -14,6 +21,46 @@ benchmarkCDF = function(predict_lib, valid_lib, shuffled_ctl = T,
   shuffled_results_cdf = ecdf(shuffled_results[unlist(sapply(strsplit(shuffled_results$set1,"_"),"[",1)) == unlist(sapply(strsplit(shuffled_results$set2,"_"),"[",1)), "rank"])
 
   return(list(results_cdf = results_cdf, shuffled_results_cdf = shuffled_results_cdf))
+}
+
+multibenchmarkCDF = function(predict_libs, valid_lib, integrate = T, background = NULL){
+  #check whether valid_lib is nested list
+  if(any(sapply(valid_lib, is.list))) error("May only use one validation library.")
+
+  #get enrichment results for all prediction libraries
+  results = lapply(predict_lib, function(p_lib){
+    return(genesetr::pairwiseSetOverlap(lib1 = p_lib, lib2 = valid_lib,
+    background = background, method = method))})
+  results = lapply(results, function(result) return(chea3::resultsRank(result,2)))
+
+
+  #shuffle the validation library in each results df
+  shuffled_results = lapply(results, function(result){
+    return(chea3::shuffleResults(result, shuffle_set = 2))})
+  shuffled_results = lapply(shuffled_results,
+    function(shuffled_result) return(chea3::resultsRank(shuffled_result,2)))
+
+  if(integrate == T){
+    results = genesetr::integrateResultsDF(results)
+    shuffled_results = genesetr::integrateResultsDF(results)
+  }
+
+
+  results_cdf = lapply(results,function(results){
+    return(ecdf(result[unlist(sapply(strsplit(result$set1,"_"),"[",1)) ==
+        unlist(sapply(strsplit(result$set2,"_"),"[",1)),"rank"]))
+  })
+
+  shuffled_results_cdf = lapply(shuffled_results, function(shuffled_results){
+    return(ecdf(shuffled_result[unlist(sapply(strsplit(shuffled_result$set1,"_"),"[",1)) == unlist(sapply(strsplit(shuffled_result$set2,"_"),"[",1)), "rank"]))
+  })
+
+
+
+
+  return(list(results_cdf = results_cdf, shuffled_results_cdf = shuffled_results_cdf))
+
+
 }
 
 shuffleResults = function(results,shuffle_set = 2){
