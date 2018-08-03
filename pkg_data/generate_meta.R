@@ -6,7 +6,7 @@ lib_meta[["ChEA"]] = "ChIP-seq; Manually curated TF regulons from publications w
 lib_meta[["ReMap"]] = "ChIP-seq; Uniformly re-processed ChIP-seq experiments from GEO and ENCODE"
 lib_meta[["ENCODE"]] = "ChIP-seq; TF targets from the ENCODE consortium"
 lib_meta[["Enrichr"]] = "Co-occurrence; TF-gene co-occurrence in crowd-submitted gene sets"
-lib_meta[["Perturbations"]] = "Gene signatures; Differentially expressed genes on genetic perturbation of a single TF (e.g. KO, KD, OE)"
-lib_meta[["BioPLEX"]] = "Protein-protein interactions; TF protein interactions curated from published studies"
+lib_meta[["Perturbations"]] = "Gene signatures; Differentially expressed genes on genetic perturbation of a single TF"
+lib_meta[["BioGRID"]] = "Protein-protein interactions; TF protein interactions curated from published studies"
 
 devtools::use_data(lib_meta, overwrite = T)
