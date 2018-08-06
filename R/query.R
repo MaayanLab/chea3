@@ -54,6 +54,7 @@ queryChea = function(
     results <- chea3::integrateResultsDF(results)}
 
   results <- lapply(results, function(result){
+    result$rank <- rank(result$rank, ties.method = "random")
     result <- result[order(result$rank),]
     if(n_results == "all"){
       return(result)
@@ -126,7 +127,7 @@ integrateResultsDF = function(results){
     return(sub)
   })
   int_results$prev_rank <- int_results$rank
-  int_results <- chea3::resultsRank(int_results,"set2")
+  int_results$rank <- rank(int_results$rank, ties.method = "random")/nrow(int_results)
   int_results$.id <- as.character(int_results$.id)
 
   results[["Integrated"]] <- int_results
