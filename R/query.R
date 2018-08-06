@@ -25,33 +25,43 @@ queryChea = function(
   method = c("FET"),
   background = NULL){
 
-  query = list(geneset)
-  names(query) = set_name
+  query <- list(geneset)
+  names(query) <- set_name
 
   #check library names and ensure in-package availability
-  if(!all(libnames %in% names(libs))){
+  if(!all(libnames %in% names(chea3::libs))){
     error(paste("The following libraries are unavailable:",
       paste(setdiff(libnames,names(libs)),collapse = " "),
       "These are the libraries available:",
       paste(names(libs),collapse = " ")))}
 
-  my_libs = chea3::libs[libnames]
+  my_libs <- chea3::libs[libnames]
 
   #list of results data frames
 
-  results = lapply(my_libs,function(x){
-    x = genesetr::removeLibWeights(x)
-    df = genesetr::pairwiseSetOverlap(query, x,
+  results <- lapply(my_libs,function(x){
+    x <- genesetr::removeLibWeights(x)
+    df <- genesetr::pairwiseSetOverlap(x, query,
       background = background, method = method)
-    df$rank = rank(df$FET.p.val,ties.method = "random")/nrow(df)
-    df$TF = unlist(sapply(strsplit(df$set2,"_"),"[",1))
-    df[,c("a","b","c","d")] = NULL
+    df$rank <- rank(df$FET.p.val,ties.method = "random")/nrow(df)
+    df$TF <- unlist(sapply(strsplit(df$set1,"_"),"[",1))
+    df[,c("a","b","c","d")] <- NULL
+    df <- genesetr::dfcols.tochar(df)
     return(df)
   })
 
+  if(integrate_libs){
+    results <- chea3::integrateResultsDF(results)}
 
-  if(integrate_libs) results = genesetr::integrateResultsDF(results)
-
+  results <- lapply(results, function(result){
+    result <- result[order(result$rank),]
+    if(n_results == "all"){
+      return(result)
+      }
+    else{
+        return(result[1:n_results,])
+    }
+  })
   return(results)
 }
 
@@ -83,46 +93,42 @@ queryCheaWeb = function(
   method = c("FET"),
   background = 30000){
 
-  results = queryChea(geneset = geneset,
+  results <- queryChea(geneset = geneset,
     set_name = set_name,
     n_results = n_results,
     libnames = libnames,
     integrate_libs = integrate_libs,
     method = method,
     background = background)
-  lib_descripts = chea3::getLibDescriptShort()
-  lib_descripts = lib_descripts[order(unlist(lib_descripts))]
-  lib_descripts = rlist::list.prepend(lib_descripts,Integrated = "integrated results from all resources")
 
-  results = results[match(names(lib_descripts),names(results))]
-  idx = match(names(results),names(lib_descripts))
-  names(results) = paste(names(results), ": ",
+  lib_descripts <- chea3::getLibDescriptShort()
+  lib_descripts <- lib_descripts[order(unlist(lib_descripts))]
+  lib_descripts <- rlist::list.prepend(lib_descripts,Integrated = "integrated results from all resources")
+
+  results <- results[match(names(lib_descripts),names(results))]
+  idx <- match(names(results),names(lib_descripts))
+
+  names(results) <- paste(names(results), ": ",
     unlist(lib_descripts[idx]),sep = "")
+
 
   return(jsonlite::toJSON(results))
 }
 
 integrateResultsDF = function(results){
-  if(!sum(sapply(list,is.data.frame))>1) error("Must have >1 results dataframe in order to integrate results.")
+  # if(!sum(sapply(list,is.data.frame))>1) error("Must have >1 results dataframe in order to integrate results.")
 
-  df_results = plyr::ldply(results,function(sub){
+  df_results <- plyr::ldply(results,function(sub){
     return(sub)
   })
-  int_results = plyr::ddply(df_results,plyr::.(TF),function(sub){
+  int_results <- plyr::ddply(df_results,plyr::.(set2,TF),function(sub){
     sub = sub[order(sub$rank),][1,]
     return(sub)
   })
-  int_results$prev_rank = int_results$rank
-  int_results$rank = rank(int_results$rank,ties.method = "random")
+  int_results$prev_rank <- int_results$rank
+  int_results <- chea3::resultsRank(int_results,"set2")
+  int_results$.id <- as.character(int_results$.id)
 
-  results[["Integrated"]] = int_results
-
-  results = lapply(results,function(sub){
-    sub$rank = rank(sub$rank,ties.method = "random")
-    if(n_results == "all"){
-      return(sub[order(sub$rank),])
-    }
-    return(sub[order(sub$rank),][1:n_results,])
-  })
+  results[["Integrated"]] <- int_results
   return(results)
 } #end function integrateResultsDF()

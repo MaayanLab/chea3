@@ -23,40 +23,42 @@ benchmarkCDF = function(predict_lib, valid_lib, shuffled_ctl = T,
   return(list(results_cdf = results_cdf, shuffled_results_cdf = shuffled_results_cdf))
 }
 
-multibenchmarkCDF = function(predict_libs, valid_lib, integrate = T, background = NULL){
+multibenchmarkCDF = function(predict_libs, valid_lib,
+  background = NULL, method = "FET", integrate = T){
   #check whether valid_lib is nested list
   if(any(sapply(valid_lib, is.list))) error("May only use one validation library.")
 
   #get enrichment results for all prediction libraries
-  results = lapply(predict_lib, function(p_lib){
+  results = lapply(predict_libs, function(p_lib){
     return(genesetr::pairwiseSetOverlap(lib1 = p_lib, lib2 = valid_lib,
     background = background, method = method))})
   results = lapply(results, function(result) return(chea3::resultsRank(result,2)))
+  results = lapply(results, function(result){
+    result$TF = unlist(sapply(strsplit(result$set1,"_"),"[",1))
+    return(result)
+  })
+  results = lapply(results, chea3::resultsRank,2)
 
+  if(integrate == T){
+    results = chea3::integrateResultsDF(results)
+  }
 
   #shuffle the validation library in each results df
   shuffled_results = lapply(results, function(result){
-    return(chea3::shuffleResults(result, shuffle_set = 2))})
+    return(chea3::shuffleResults(result, shuffle_set = "set2"))})
   shuffled_results = lapply(shuffled_results,
-    function(shuffled_result) return(chea3::resultsRank(shuffled_result,2)))
-
-  if(integrate == T){
-    results = genesetr::integrateResultsDF(results)
-    shuffled_results = genesetr::integrateResultsDF(results)
-  }
+    function(shuffled_result) return(chea3::resultsRank(shuffled_result,"set2")))
 
 
-  results_cdf = lapply(results,function(results){
+
+  results_cdf = lapply(results,function(result){
     return(ecdf(result[unlist(sapply(strsplit(result$set1,"_"),"[",1)) ==
         unlist(sapply(strsplit(result$set2,"_"),"[",1)),"rank"]))
   })
 
-  shuffled_results_cdf = lapply(shuffled_results, function(shuffled_results){
+  shuffled_results_cdf = lapply(shuffled_results, function(shuffled_result){
     return(ecdf(shuffled_result[unlist(sapply(strsplit(shuffled_result$set1,"_"),"[",1)) == unlist(sapply(strsplit(shuffled_result$set2,"_"),"[",1)), "rank"]))
   })
-
-
-
 
   return(list(results_cdf = results_cdf, shuffled_results_cdf = shuffled_results_cdf))
 
