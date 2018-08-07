@@ -45,6 +45,7 @@ queryChea = function(
       background = background, method = method)
     df$rank <- rank(df$FET.p.val,ties.method = "random")/nrow(df)
     df$TF <- unlist(sapply(strsplit(df$set1,"_"),"[",1))
+    df$FET.p.val <- signif(df$FET.p.val,3)
     df[,c("a","b","c","d")] <- NULL
     df <- genesetr::dfcols.tochar(df)
     return(df)
