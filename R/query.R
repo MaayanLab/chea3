@@ -22,6 +22,7 @@ queryChea = function(
   n_results = 10,
   libnames = names(chea3::libs),
   integrate_libs = T,
+  integrate_libnames = setdiff(names(chea3::libs),"BioGRID"),
   method = c("FET"),
   background = NULL){
 
@@ -52,7 +53,7 @@ queryChea = function(
   })
 
   if(integrate_libs){
-    results <- chea3::integrateResultsDF(results)}
+    results <- chea3::integrateResultsDF(results,integrate_libnames)}
 
   results <- lapply(results, function(result){
     result$rank <- rank(result$rank, ties.method = "random")
@@ -117,12 +118,13 @@ queryCheaWeb = function(
   return(jsonlite::toJSON(results))
 }
 
-integrateResultsDF = function(results){
+integrateResultsDF = function(results, integrate_libnames){
   # if(!sum(sapply(list,is.data.frame))>1) error("Must have >1 results dataframe in order to integrate results.")
 
   df_results <- plyr::ldply(results,function(sub){
     return(sub)
   })
+  df_results <- df_results[df_results[,".id"] %in% integrate_libnames,]
   int_results <- plyr::ddply(df_results,plyr::.(set2,TF),function(sub){
     sub = sub[order(sub$rank),][1,]
     return(sub)
