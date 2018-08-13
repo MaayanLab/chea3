@@ -4,7 +4,9 @@ libs[["ReMap"]] = genesetr::loadGMT("/Users/alexandrakeenan/Projects/TF_libs/gmt
 libs[["ARCHS4"]] = genesetr::loadGMT("/Users/alexandrakeenan/Projects/TF_libs/gmts/coexpression/ARCHS4_TFs_pearson_n_50000_human.gmt")
 libs[["ChEA"]] = genesetr::loadGMT("/Users/alexandrakeenan/Projects/TF_libs/gmts/enrichr_dwnld_derived/chipseq/HGNC_mapped_enrichr_ChEA_2016.txt")
 libs[["GTEx"]] = genesetr::loadGMT("/Users/alexandrakeenan/Projects/TF_libs/gmts/coexpression/GTEx_TFs_pearson.gmt")
-libs[["Enrichr"]] = genesetr::loadGMT("/Volumes/External/CHEA3/Enrichr_TF_cooccur/Enrichr_tf_cooccur_probability.gmt")
+libs[["Enrichr"]] = genesetr::loadGMT("/Users/alexandrakeenan/Projects/TF_libs/gmts/enrichr_cooccurrence/enrichr_coocurrence.gmt")
+libs[["BioGRID"]] = genesetr::loadGMT("/Users/alexandrakeenan/Projects/TF_libs/gmts/ppi/BIOGRID-ALL-3.4.162.gmt")
+libs[["Perturbations"]] = genesetr::loadGMT("/Users/alexandrakeenan/Projects/TF_libs/gmts/single_TF_pert/RNAseq_Micro_TF_perts_all.gmt")
 
 libs = lapply(libs, genesetr::removeDupes)
 libs = lapply(libs, genesetr::removeEmptySets)
@@ -25,3 +27,9 @@ devtools::use_data(Enrichr, overwrite = T)
 
 GTEx = libs[["GTEx"]]
 devtools::use_data(GTEx, overwrite = T)
+
+Perturbations = libs[["Perturbations"]]
+devtools::use_data(Perturbations, overwrite = T)
+
+BioGRID = libs[["BioGRID"]]
+devtools::use_data(BioGRID, overwrite = T)
