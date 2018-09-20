@@ -104,15 +104,15 @@ queryCheaWeb = function(
     method = method,
     background = background)
 
-  lib_descripts <- chea3::getLibDescriptShort()
-  lib_descripts <- lib_descripts[order(unlist(lib_descripts))]
-  lib_descripts <- rlist::list.prepend(lib_descripts,Integrated = "integrated results from all resources")
-
-  results <- results[match(names(lib_descripts),names(results))]
-  idx <- match(names(results),names(lib_descripts))
-
-  names(results) <- paste(names(results), ": ",
-    unlist(lib_descripts[idx]),sep = "")
+  # lib_descripts <- chea3::getLibDescriptShort()
+  # lib_descripts <- lib_descripts[order(unlist(lib_descripts))]
+  # lib_descripts <- rlist::list.prepend(lib_descripts,Integrated = "integrated results from all resources")
+  #
+  # results <- results[match(names(lib_descripts),names(results))]
+  # idx <- match(names(results),names(lib_descripts))
+  #
+  # names(results) <- paste(names(results), ": ",
+  #   unlist(lib_descripts[idx]),sep = "")
 
 
   return(jsonlite::toJSON(results))
