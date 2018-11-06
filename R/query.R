@@ -116,7 +116,7 @@ queryCheaWeb = function(
 
   json_results =  gsub("FET.p.val","FET p-value",jsonlite::toJSON(results))
 
-  return(jsonlite::toJSON(results))
+  return(json_results)
 }
 
 integrateResultsDF = function(results, integrate_libnames){
