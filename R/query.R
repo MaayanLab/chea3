@@ -114,6 +114,7 @@ queryCheaWeb = function(
   # names(results) <- paste(names(results), ": ",
   #   unlist(lib_descripts[idx]),sep = "")
 
+  json_results =  gsub("FET.p.val","FET p-value",jsonlite::toJSON(results))
 
   return(jsonlite::toJSON(results))
 }
